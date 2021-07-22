@@ -19,19 +19,19 @@ for ind = 1:4
     
     switch ind
         case 1
-            load 'Data/filtStairTraj_i20'
+            load '../Data/filtStairTraj_i20'
             current_incline = '20^o'
         case 2
-            load 'Data/filtStairTraj_i25'
+            load '../Data/filtStairTraj_i25'
             current_incline = '25^o'
         case 3
-            load 'Data/filtStairTraj_i30'
+            load '../Data/filtStairTraj_i30'
             current_incline = '30^o'
         case 4
-            load 'Data/filtStairTraj_i35'
+            load '../Data/filtStairTraj_i35'
             current_incline = '35^o'
         otherwise
-            load 'Data/filtStairTraj_i20'
+            load '../Data/filtStairTraj_i20'
             current_incline = '20^o'
     end
     
@@ -49,7 +49,7 @@ for ind = 1:4
     c = .53;
     pv = zeros(1,length(thigh_mean));
     t = linspace(0,100,length(thigh_mean));
-    
+    q_po = 10;
     
     
     for i = 1:length(t)
@@ -58,7 +58,7 @@ for ind = 1:4
         thighd = thighd_mean(i);
         
         
-        [currPV,currState,sm,qhm] = calculatePhaseVariable_Stair_Normalized(thigh, thighd, qh_min, qh_max, c, prevState,prevPV, sm, qhm);
+        [currPV,currState,sm,qhm] = calculatePhaseVariable_Stair_Normalized(thigh, thighd, qh_min, qh_max,q_po, c, prevState,prevPV, sm, qhm);
         
         
         
@@ -119,8 +119,8 @@ for ind = 1:4
     
     sh = sym('sh');
     
-    N_k = 14;
-    N_a = 14;
+    N_k = 20;
+    N_a = 20;
     hk = .5*pk_real(1) + .5*pk_real(N_k/2)*cos(pi*N_k*sh);
     ha = .5*pa_real(1) + .5*pa_real(N_a/2)*cos(pi*N_a*sh);
     

@@ -16,7 +16,7 @@ clc;
 % knee_mean = circshift(knee_mean,-shift);
 current_incline = '20^o';
 
-load 'Data/filtStairTraj_i20.mat'
+load '../Data/filtStairTraj_i20.mat'
 knee_mean = knee_mean';
 thigh_mean = thigh_mean';
 
