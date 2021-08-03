@@ -9,14 +9,15 @@ function [currPV,currState,sm,qhm,mhf] = calculatePhaseVariable_Stair(thigh, thi
     else
         FC = 1;
     end
-
+    descendingPV = (qh_max-thigh)/(qh_max-qh_min)*c;
+    ascendingPV =  1 + (1-sm)*(thigh-qh_max)/(qh_max-qhm);
 %     FC
 %     prevState
     if (prevState ==1 && thigh < qpo && FC == 1)
         currState=2;
     elseif (prevState == 2 && thighd > 0)
         currState = 3;
-        sm = prevPV;
+        sm = descendingPV;
         qhm = thigh;
     elseif (prevState == 4 && (mhf == 1 || FC == 1))
         currState = 1;
@@ -33,14 +34,15 @@ function [currPV,currState,sm,qhm,mhf] = calculatePhaseVariable_Stair(thigh, thi
     end
 
     if(currState == 1 || currState == 2)
-        currPV = (qh_max-thigh)/(qh_max-qh_min)*c;
+        currPV = descendingPV;
     elseif (currState == 3 || currState == 4)
-        currPV = 1 + (1-sm)*(thigh-qh_max)/(qh_max-qhm);
+        currPV = ascendingPV;
     end
 
 
     if (currState == 3 && (prevPV > currPV))
-        currPV=prevPV;
+        currPV=max(prevPV,ascendingPV);
+%         currPV=(qh_max-thigh)/(qh_max-qh_min)*c;
     end
 
 

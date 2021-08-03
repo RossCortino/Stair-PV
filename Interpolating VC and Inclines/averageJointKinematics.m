@@ -1,4 +1,4 @@
-function [thigh_mean,knee_mean,ankle_mean] = averageJointKinematics(Normalized, sub, trial, incline)
+function [thigh_mean,knee_mean,ankle_mean,thigh_sd, knee_sd, ankle_sd] = averageJointKinematics(Normalized, sub, trial, incline)
 
 for s=1:numel(sub)
     
@@ -36,8 +36,12 @@ for s=1:numel(sub)
 %     ylabel('deg')
 
 end
+    thigh_sd = std(thigh_mean);
+    knee_sd = std(knee_mean);
+    ankle_sd = std(ankle_mean);
     thigh_mean = mean(thigh_mean);
     knee_mean = mean(knee_mean);
     ankle_mean = mean(ankle_mean);
+    
 
 end

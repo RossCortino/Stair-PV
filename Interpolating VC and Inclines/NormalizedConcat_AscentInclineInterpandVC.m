@@ -44,7 +44,6 @@ ankle_35 = ankle_mean;
 
 L = length(thigh_20);
 
-%% Calculate PV
 
 %% Parameterize Joint Trajectories as functions of Phase
 current_incline = '20^o';
@@ -391,6 +390,7 @@ N_k = 20;
 N_a = 20;
 sh = sym('sh');
 knee_est = [];
+qpo = 10;
 %Calculate Phase Variable
 for i = 1:length(thigh_stream)
     thigh = thigh_stream(i);
@@ -420,7 +420,7 @@ for i = 1:length(thigh_stream)
 
         end
     end
-    [currPV,currState,sm,qhm,mhf] = calculatePhaseVariable_Stair(thigh, thighd, qh_min, qh_max, c, prevState,prevPV, sm, qhm,mhf);
+    [currPV,currState,sm,qhm,mhf] = calculatePhaseVariable_Stair(thigh, thighd, qh_min, qh_max,qpo, c, prevState,prevPV, sm, qhm,mhf);
     s(i) = currPV;
     prevState = currState;
     state(i) = currState;
