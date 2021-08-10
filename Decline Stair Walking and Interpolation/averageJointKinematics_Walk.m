@@ -1,10 +1,10 @@
-function [thigh_mean,knee_mean,ankle_mean,thigh_sd, knee_sd, ankle_sd] = averageJointKinematics(Normalized, sub, trial, incline)
+function [thigh_mean,knee_mean,ankle_mean,thigh_sd, knee_sd, ankle_sd] = averageJointKinematics_Stair(Normalized, sub, trial, incline)
 
 for s=1:numel(sub)
     
     % this line uses a dynamic field reference to access the data of each
     % subject in a for loop. Dynamic field references: https://blogs.mathworks.com/loren/2005/12/13/use-dynamic-field-references/
-    temp_task = Normalized.(sub{s}).Stair.(trial{1}).(incline{1}); 
+    temp_task = Normalized.(sub{s}).Walk.(trial{1}).(incline{1}); 
     
    % load pelvis and hip data, calculate thigh angle 
     temp_knee = temp_task.jointAngles.KneeAngles;

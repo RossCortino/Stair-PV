@@ -25,7 +25,29 @@ leftOutInc = input(prompt);
 
 
 class(leftOutInc);
-
+% load '../Data/filtStairTraj_i20.mat'
+%
+% thigh_20 = thigh_mean;
+% knee_20 = knee_mean;
+% ankle_20 = ankle_mean;
+%
+% load '../Data/filtStairTraj_i25.mat'
+%
+% thigh_25 = thigh_mean';
+% knee_25 = knee_mean;
+% ankle_25 = ankle_mean;
+%
+% load '../Data/filtStairTraj_i30.mat'
+%
+% thigh_30 = thigh_mean';
+% knee_30 = knee_mean;
+% ankle_30 = ankle_mean;
+%
+% load '../Data/filtStairTraj_i35.mat'
+%
+% thigh_35 = thigh_mean';
+% knee_35 = knee_mean;
+% ankle_35 = ankle_mean;
 
 incline={'i20'};
 
@@ -47,31 +69,53 @@ incline={'i35'};
 
 L = length(thigh_20);
 
+% Load Walking Trajectories
+sub={'AB01','AB02','AB03','AB04','AB05','AB06','AB07','AB08','AB09','AB10'};
+trial={'s1'};
+incline={'i0'};
+[thigh_0, knee_0, ankle_0, thigh_0sd, knee_0sd, ankle_0sd] = averageJointKinematics_Walk(Normalized,sub,trial,incline);
+
+figure
+plot(thigh_0)
+
+mean_max = mean([max(thigh_20), max(thigh_25), max(thigh_30), max(thigh_35)])
+mean_min = mean([min(thigh_20), min(thigh_25), min(thigh_30), min(thigh_35)])
+t = linspace(0,1,length(thigh_20));
+c_20 = t(find(thigh_20 == min(thigh_20)));
+c_25 = t(find(thigh_25 == min(thigh_25)));
+c_30 = t(find(thigh_30 == min(thigh_30)));
+c_35 = t(find(thigh_35 == min(thigh_35)));
+c = mean([c_20 c_25 c_30 c_35])
 
 %% Parameterize Joint Trajectories as functions of Phase
 current_incline = '20^o';
-for ind = 1:4
+for ind = 1:5
     
     switch ind
         case 1
+            thigh_mean = thigh_0;
+            knee_mean = knee_0;
+            ankle_mean = ankle_0;
+            current_incline = '0^o';
+        case 2
             %             load '../Data/filtStairTraj_i20'
             thigh_mean = thigh_20;
             knee_mean = knee_20;
             ankle_mean = ankle_20;
             current_incline = '20^o';
-        case 2
+        case 3
             %             load '../Data/filtStairTraj_i25'
             thigh_mean = thigh_25;
             knee_mean = knee_25;
             ankle_mean = ankle_25;
             current_incline = '25^o';
-        case 3
+        case 4
             %             load '../Data/filtStairTraj_i30'
             thigh_mean = thigh_30;
             knee_mean = knee_30;
             ankle_mean = ankle_30;
             current_incline = '30^o';
-        case 4
+        case 5
             %             load '../Data/filtStairTraj_i35'
             thigh_mean = thigh_35;
             knee_mean = knee_35;
@@ -200,40 +244,46 @@ for ind = 1:4
     
 end
 
-knee_20_incvc = knee_interp(1,:);
-knee_25_incvc = knee_interp(2,:);
-knee_30_incvc = knee_interp(3,:);
-knee_35_incvc = knee_interp(4,:);
+knee_0_incvc = knee_interp(1,:);
+knee_20_incvc = knee_interp(2,:);
+knee_25_incvc = knee_interp(3,:);
+knee_30_incvc = knee_interp(4,:);
+knee_35_incvc = knee_interp(5,:);
 
-ankle_20_incvc = ankle_interp(1,:);
-ankle_25_incvc = ankle_interp(2,:);
-ankle_30_incvc = ankle_interp(3,:);
-ankle_35_incvc = ankle_interp(4,:);
+ankle_0_incvc = ankle_interp(1,:);
+ankle_20_incvc = ankle_interp(2,:);
+ankle_25_incvc = ankle_interp(3,:);
+ankle_30_incvc = ankle_interp(4,:);
+ankle_35_incvc = ankle_interp(5,:);
 
 
+knee_0_inc = knee_traj(1,:);
+knee_20_inc = knee_traj(2,:);
+knee_25_inc = knee_traj(3,:);
+knee_30_inc = knee_traj(4,:);
+knee_35_inc = knee_traj(5,:);
 
-knee_20_inc = knee_traj(1,:);
-knee_25_inc = knee_traj(2,:);
-knee_30_inc = knee_traj(3,:);
-knee_35_inc = knee_traj(4,:);
-
-ankle_20_inc = ankle_traj(1,:);
-ankle_25_inc = ankle_traj(2,:);
-ankle_30_inc = ankle_traj(3,:);
-ankle_35_inc = ankle_traj(4,:);
+ankle_0_inc = ankle_traj(1,:);
+ankle_20_inc = ankle_traj(2,:);
+ankle_25_inc = ankle_traj(3,:);
+ankle_30_inc = ankle_traj(4,:);
+ankle_35_inc = ankle_traj(5,:);
 
 % Coefficients incline and vc interp
 L = length(knee_20);
 N = 150;
 N_k = 12;
-N_a = 14;
+N_a = 12;
 
 
 switch leftOutInc
+    
     case 1 %20
+        
         pk_real25_incvc = real(fft(knee_25_incvc)/(L/2));
         pk_real30_incvc = real(fft(knee_30_incvc)/(L/2));
         pk_real35_incvc = real(fft(knee_35_incvc)/(L/2));
+        
         pk_im25_incvc = imag(fft(knee_25_incvc)/(L/2));
         pk_im30_incvc = imag(fft(knee_30_incvc)/(L/2));
         pk_im35_incvc = imag(fft(knee_35_incvc)/(L/2));
@@ -241,11 +291,12 @@ switch leftOutInc
         pa_real25_incvc = real(fft(ankle_25_incvc)/(L/2));
         pa_real30_incvc = real(fft(ankle_30_incvc)/(L/2));
         pa_real35_incvc = real(fft(ankle_35_incvc)/(L/2));
+        
         pa_im25_incvc = imag(fft(ankle_25_incvc)/(L/2));
         pa_im30_incvc = imag(fft(ankle_30_incvc)/(L/2));
         pa_im35_incvc = imag(fft(ankle_35_incvc)/(L/2));
         
-        x = [max(thigh_25) max(thigh_30) max(thigh_35)];
+        x = [max(thigh_0) max(thigh_25) max(thigh_30) max(thigh_35)];
     case 2 %25
         pk_real20_incvc = real(fft(knee_20_incvc)/(L/2));
         pk_real30_incvc = real(fft(knee_30_incvc)/(L/2));
@@ -261,7 +312,7 @@ switch leftOutInc
         pa_im30_incvc = imag(fft(ankle_30_incvc)/(L/2));
         pa_im35_incvc = imag(fft(ankle_35_incvc)/(L/2));
         
-        x = [max(thigh_20) max(thigh_30) max(thigh_35)];
+        x = [max(thigh_0) max(thigh_20) max(thigh_30) max(thigh_35)];
     case 3 %30
         pk_real20_incvc = real(fft(knee_20_incvc)/(L/2));
         pk_real25_incvc = real(fft(knee_25_incvc)/(L/2));
@@ -277,7 +328,7 @@ switch leftOutInc
         pa_im25_incvc = imag(fft(ankle_25_incvc)/(L/2));
         pa_im35_incvc = imag(fft(ankle_35_incvc)/(L/2));
         
-        x = [max(thigh_20) max(thigh_25) max(thigh_35)];
+        x = [max(thigh_0) max(thigh_20) max(thigh_25) max(thigh_35)];
     case 4 %35
         pk_real20_incvc = real(fft(knee_20_incvc)/(L/2));
         pk_real25_incvc = real(fft(knee_25_incvc)/(L/2));
@@ -293,7 +344,7 @@ switch leftOutInc
         pa_im25_incvc = imag(fft(ankle_25_incvc)/(L/2));
         pa_im30_incvc = imag(fft(ankle_30_incvc)/(L/2));
         
-        x = [max(thigh_20) max(thigh_25) max(thigh_30)];
+        x = [max(thigh_0) max(thigh_20) max(thigh_25) max(thigh_30)];
     otherwise
         pk_real25_incvc = real(fft(knee_25_incvc)/(L/2));
         pk_real30_incvc = real(fft(knee_30_incvc)/(L/2));
@@ -309,37 +360,43 @@ switch leftOutInc
         pa_im30_incvc = imag(fft(ankle_30_incvc)/(L/2));
         pa_im35_incvc = imag(fft(ankle_35_incvc)/(L/2));
         
-        x = [max(thigh_25) max(thigh_30) max(thigh_35)];
+        x = [max(thigh_0) max(thigh_25) max(thigh_30) max(thigh_35)];
 end
+
+pk_real0_incvc = real(fft(knee_0_incvc)/(L/2));
+pk_im0_incvc = imag(fft(knee_0_incvc)/(L/2));
+
+pa_real0_incvc = real(fft(ankle_0_incvc)/(L/2));
+pa_im0_incvc = imag(fft(ankle_0_incvc)/(L/2));
 
 for i = 1:N/2
     switch leftOutInc
         case 1 %20
-            vkreal_incvc(i,:) = [pk_real25_incvc(i) pk_real30_incvc(i) pk_real35_incvc(i)];
-            vkim_incvc(i,:) = [pk_im25_incvc(i) pk_im30_incvc(i) pk_im35_incvc(i)];
-            vareal_incvc(i,:) = [pa_real25_incvc(i) pa_real30_incvc(i) pa_real35_incvc(i)];
-            vaim_incvc(i,:) = [pa_im25_incvc(i) pa_im30_incvc(i) pa_im35_incvc(i)];
+            vkreal_incvc(i,:) = [pk_real0_incvc(i) pk_real25_incvc(i) pk_real30_incvc(i) pk_real35_incvc(i)];
+            vkim_incvc(i,:) = [pk_im0_incvc(i) pk_im25_incvc(i) pk_im30_incvc(i) pk_im35_incvc(i)];
+            vareal_incvc(i,:) = [pa_real0_incvc(i) pa_real25_incvc(i) pa_real30_incvc(i) pa_real35_incvc(i)];
+            vaim_incvc(i,:) = [pa_im0_incvc(i) pa_im25_incvc(i) pa_im30_incvc(i) pa_im35_incvc(i)];
             
         case 2 %25
-            vkreal_incvc(i,:) = [pk_real20_incvc(i) pk_real30_incvc(i) pk_real35_incvc(i)];
-            vkim_incvc(i,:) = [pk_im20_incvc(i) pk_im30_incvc(i) pk_im35_incvc(i)];
-            vareal_incvc(i,:) = [pa_real20_incvc(i) pa_real30_incvc(i) pa_real35_incvc(i)];
-            vaim_incvc(i,:) = [pa_im20_incvc(i) pa_im30_incvc(i) pa_im35_incvc(i)];
+            vkreal_incvc(i,:) = [pk_real0_incvc(i) pk_real20_incvc(i) pk_real30_incvc(i) pk_real35_incvc(i)];
+            vkim_incvc(i,:) = [pk_im0_incvc(i) pk_im20_incvc(i) pk_im30_incvc(i) pk_im35_incvc(i)];
+            vareal_incvc(i,:) = [pa_real0_incvc(i) pa_real20_incvc(i) pa_real30_incvc(i) pa_real35_incvc(i)];
+            vaim_incvc(i,:) = [pa_im0_incvc(i) pa_im20_incvc(i) pa_im30_incvc(i) pa_im35_incvc(i)];
         case 3 %30
-            vkreal_incvc(i,:) = [pk_real20_incvc(i) pk_real25_incvc(i) pk_real35_incvc(i)];
-            vkim_incvc(i,:) = [pk_im20_incvc(i) pk_im25_incvc(i) pk_im35_incvc(i)];
-            vareal_incvc(i,:) = [pa_real20_incvc(i) pa_real25_incvc(i) pa_real35_incvc(i)];
-            vaim_incvc(i,:) = [pa_im20_incvc(i) pa_im25_incvc(i) pa_im35_incvc(i)];
+            vkreal_incvc(i,:) = [pk_real0_incvc(i) pk_real20_incvc(i) pk_real25_incvc(i) pk_real35_incvc(i)];
+            vkim_incvc(i,:) = [pk_im0_incvc(i) pk_im20_incvc(i) pk_im25_incvc(i) pk_im35_incvc(i)];
+            vareal_incvc(i,:) = [pa_real0_incvc(i) pa_real20_incvc(i) pa_real25_incvc(i) pa_real35_incvc(i)];
+            vaim_incvc(i,:) = [pa_im0_incvc(i) pa_im20_incvc(i) pa_im25_incvc(i) pa_im35_incvc(i)];
         case 4 %35
-            vkreal_incvc(i,:) = [pk_real20_incvc(i) pk_real25_incvc(i) pk_real30_incvc(i)];
-            vkim_incvc(i,:) = [pk_im20_incvc(i) pk_im25_incvc(i) pk_im30_incvc(i)];
-            vareal_incvc(i,:) = [pa_real20_incvc(i) pa_real25_incvc(i) pa_real30_incvc(i)];
-            vaim_incvc(i,:) = [pa_im20_incvc(i) pa_im25_incvc(i) pa_im30_incvc(i)];
+            vkreal_incvc(i,:) = [pk_real0_incvc(i) pk_real20_incvc(i) pk_real25_incvc(i) pk_real30_incvc(i)];
+            vkim_incvc(i,:) = [pk_im0_incvc(i) pk_im20_incvc(i) pk_im25_incvc(i) pk_im30_incvc(i)];
+            vareal_incvc(i,:) = [pa_real0_incvc(i) pa_real20_incvc(i) pa_real25_incvc(i) pa_real30_incvc(i)];
+            vaim_incvc(i,:) = [pa_im0_incvc(i) pa_im20_incvc(i) pa_im25_incvc(i) pa_im30_incvc(i)];
         otherwise
-            vkreal_incvc(i,:) = [pk_real25_incvc(i) pk_real30_incvc(i) pk_real35_incvc(i)];
-            vkim_incvc(i,:) = [pk_im25_incvc(i) pk_im30_incvc(i) pk_im35_incvc(i)];
-            vareal_incvc(i,:) = [pa_real25_incvc(i) pa_real30_incvc(i) pa_real35_incvc(i)];
-            vaim_incvc(i,:) = [pa_im25_incvc(i) pa_im30_incvc(i) pa_im35_incvc(i)];
+            vkreal_incvc(i,:) = [pk_real0_incvc(i) pk_real25_incvc(i) pk_real30_incvc(i) pk_real35_incvc(i)];
+            vkim_incvc(i,:) = [pk_im0_incvc(i) pk_im25_incvc(i) pk_im30_incvc(i) pk_im35_incvc(i)];
+            vareal_incvc(i,:) = [pa_real0_incvc(i) pa_real25_incvc(i) pa_real30_incvc(i) pa_real35_incvc(i)];
+            vaim_incvc(i,:) = [pa_im0_incvc(i) pa_im25_incvc(i) pa_im30_incvc(i) pa_im35_incvc(i)];
     end
 end
 
@@ -365,7 +422,7 @@ switch leftOutInc
         pa_im30_inc = imag(fft(ankle_30_inc)/(L/2));
         pa_im35_inc = imag(fft(ankle_35_inc)/(L/2));
         
-        x = [max(thigh_25) max(thigh_30) max(thigh_35)];
+        x = [max(thigh_0) max(thigh_25) max(thigh_30) max(thigh_35)];
     case 2 %25
         pk_real20_inc = real(fft(knee_20_inc)/(L/2));
         pk_real30_inc = real(fft(knee_30_inc)/(L/2));
@@ -381,7 +438,7 @@ switch leftOutInc
         pa_im30_inc = imag(fft(ankle_30_inc)/(L/2));
         pa_im35_inc = imag(fft(ankle_35_inc)/(L/2));
         
-        x = [max(thigh_20) max(thigh_30) max(thigh_35)];
+        x = [max(thigh_0) max(thigh_20) max(thigh_30) max(thigh_35)];
     case 3 %30
         pk_real20_inc = real(fft(knee_20_inc)/(L/2));
         pk_real25_inc = real(fft(knee_25_inc)/(L/2));
@@ -397,7 +454,7 @@ switch leftOutInc
         pa_im25_inc = imag(fft(ankle_25_inc)/(L/2));
         pa_im35_inc = imag(fft(ankle_35_inc)/(L/2));
         
-        x = [max(thigh_20) max(thigh_25) max(thigh_35)];
+        x = [max(thigh_0) max(thigh_20) max(thigh_25) max(thigh_35)];
     case 4 %35
         pk_real20_inc = real(fft(knee_20_inc)/(L/2));
         pk_real25_inc = real(fft(knee_25_inc)/(L/2));
@@ -413,7 +470,7 @@ switch leftOutInc
         pa_im25_inc = imag(fft(ankle_25_inc)/(L/2));
         pa_im30_inc = imag(fft(ankle_30_inc)/(L/2));
         
-        x = [max(thigh_20) max(thigh_25) max(thigh_30)];
+        x = [max(thigh_0) max(thigh_20) max(thigh_25) max(thigh_30)];
     otherwise
         pk_real25_inc = real(fft(knee_25_inc)/(L/2));
         pk_real30_inc = real(fft(knee_30_inc)/(L/2));
@@ -429,37 +486,43 @@ switch leftOutInc
         pa_im30_inc = imag(fft(ankle_30_inc)/(L/2));
         pa_im35_inc = imag(fft(ankle_35_inc)/(L/2));
         
-        x = [max(thigh_25) max(thigh_30) max(thigh_35)];
+        x = [max(thigh_0) max(thigh_25) max(thigh_30) max(thigh_35)];
 end
+
+pk_rea10_inc = real(fft(knee_0_inc)/(L/2));
+pk_im0_inc = imag(fft(knee_0_inc)/(L/2));
+
+pa_real0_inc = real(fft(ankle_0_inc)/(L/2));
+pa_im0_inc = imag(fft(ankle_0_inc)/(L/2));
 
 for i = 1:N/2
     switch leftOutInc
         case 1 %20
-            vkreal_inc(i,:) = [pk_real25_inc(i) pk_real30_inc(i) pk_real35_inc(i)];
-            vkim_inc(i,:) = [pk_im25_inc(i) pk_im30_inc(i) pk_im35_inc(i)];
-            vareal_inc(i,:) = [pa_real25_inc(i) pa_real30_inc(i) pa_real35_inc(i)];
-            vaim_inc(i,:) = [pa_im25_inc(i) pa_im30_inc(i) pa_im35_inc(i)];
+            vkreal_inc(i,:) = [pk_rea10_inc(i) pk_real25_inc(i) pk_real30_inc(i) pk_real35_inc(i)];
+            vkim_inc(i,:) = [pk_im0_inc(i) pk_im25_inc(i) pk_im30_inc(i) pk_im35_inc(i)];
+            vareal_inc(i,:) = [pa_real0_inc(i) pa_real25_inc(i) pa_real30_inc(i) pa_real35_inc(i)];
+            vaim_inc(i,:) = [pa_im0_inc(i) pa_im25_inc(i) pa_im30_inc(i) pa_im35_inc(i)];
             
         case 2 %25
-            vkreal_inc(i,:) = [pk_real20_inc(i) pk_real30_inc(i) pk_real35_inc(i)];
-            vkim_inc(i,:) = [pk_im20_inc(i) pk_im30_inc(i) pk_im35_inc(i)];
-            vareal_inc(i,:) = [pa_real20_inc(i) pa_real30_inc(i) pa_real35_inc(i)];
-            vaim_inc(i,:) = [pa_im20_inc(i) pa_im30_inc(i) pa_im35_inc(i)];
+            vkreal_inc(i,:) = [pk_rea10_inc(i) pk_real20_inc(i) pk_real30_inc(i) pk_real35_inc(i)];
+            vkim_inc(i,:) = [pk_im0_inc(i) pk_im20_inc(i) pk_im30_inc(i) pk_im35_inc(i)];
+            vareal_inc(i,:) = [pa_real0_inc(i) pa_real20_inc(i) pa_real30_inc(i) pa_real35_inc(i)];
+            vaim_inc(i,:) = [pa_im0_inc(i) pa_im20_inc(i) pa_im30_inc(i) pa_im35_inc(i)];
         case 3 %30
-            vkreal_inc(i,:) = [pk_real20_inc(i) pk_real25_inc(i) pk_real35_inc(i)];
-            vkim_inc(i,:) = [pk_im20_inc(i) pk_im25_inc(i) pk_im35_inc(i)];
-            vareal_inc(i,:) = [pa_real20_inc(i) pa_real25_inc(i) pa_real35_inc(i)];
-            vaim_inc(i,:) = [pa_im20_inc(i) pa_im25_inc(i) pa_im35_inc(i)];
+            vkreal_inc(i,:) = [pk_rea10_inc(i) pk_real20_inc(i) pk_real25_inc(i) pk_real35_inc(i)];
+            vkim_inc(i,:) = [pk_im0_inc(i) pk_im20_inc(i) pk_im25_inc(i) pk_im35_inc(i)];
+            vareal_inc(i,:) = [pa_real0_inc(i) pa_real20_inc(i) pa_real25_inc(i) pa_real35_inc(i)];
+            vaim_inc(i,:) = [pa_im0_inc(i) pa_im20_inc(i) pa_im25_inc(i) pa_im35_inc(i)];
         case 4 %35
-            vkreal_inc(i,:) = [pk_real20_inc(i) pk_real25_inc(i) pk_real30_inc(i)];
-            vkim_inc(i,:) = [pk_im20_inc(i) pk_im25_inc(i) pk_im30_inc(i)];
-            vareal_inc(i,:) = [pa_real20_inc(i) pa_real25_inc(i) pa_real30_inc(i)];
-            vaim_inc(i,:) = [pa_im20_inc(i) pa_im25_inc(i) pa_im30_inc(i)];
+            vkreal_inc(i,:) = [pk_rea10_inc(i) pk_real20_inc(i) pk_real25_inc(i) pk_real30_inc(i)];
+            vkim_inc(i,:) = [pk_im0_inc(i) pk_im20_inc(i) pk_im25_inc(i) pk_im30_inc(i)];
+            vareal_inc(i,:) = [pa_real0_inc(i) pa_real20_inc(i) pa_real25_inc(i) pa_real30_inc(i)];
+            vaim_inc(i,:) = [pa_im0_inc(i) pa_im20_inc(i) pa_im25_inc(i) pa_im30_inc(i)];
         otherwise
-            vkreal_inc(i,:) = [pk_real25_inc(i) pk_real30_inc(i) pk_real35_inc(i)];
-            vkim_inc(i,:) = [pk_im25_inc(i) pk_im30_inc(i) pk_im35_inc(i)];
-            vareal_inc(i,:) = [pa_real25_inc(i) pa_real30_inc(i) pa_real35_inc(i)];
-            vaim_inc(i,:) = [pa_im25_inc(i) pa_im30_inc(i) pa_im35_inc(i)];
+            vkreal_inc(i,:) = [pk_rea10_inc(i) pk_real25_inc(i) pk_real30_inc(i) pk_real35_inc(i)];
+            vkim_inc(i,:) = [pk_im0_inc(i) pk_im25_inc(i) pk_im30_inc(i) pk_im35_inc(i)];
+            vareal_inc(i,:) = [pa_real0_inc(i) pa_real25_inc(i) pa_real30_inc(i) pa_real35_inc(i)];
+            vaim_inc(i,:) = [pa_im0_inc(i) pa_im25_inc(i) pa_im30_inc(i) pa_im35_inc(i)];
     end
 end
 
@@ -484,12 +547,12 @@ switch leftOutInc
         thigh_sd =thigh_20sd;
         ankle_sd =ankle_20sd;
         knee_sd =knee_20sd;
-        thigh_traj = [thigh_25;thigh_30;thigh_35];
+        thigh_traj = [thigh_25;thigh_30;thigh_35;thigh_0];
         incline={'i20'};
         knee_reparam = knee_interp(1,:);
         ankle_reparam = ankle_interp(1,:);
         
-        leg = ["25^o", "30^o", "35^o", "Unknown (20^o)"];
+        leg = ["25^o", "30^o", "35^o", "Unknown (20^o)","Level Ground Walking"];
         
         strIncline = "20^o"
         
@@ -505,12 +568,12 @@ switch leftOutInc
         ankle_sd =ankle_25sd;
         knee_sd =knee_25sd;
         
-        thigh_traj = [thigh_20;thigh_30;thigh_35];
+        thigh_traj = [thigh_20;thigh_30;thigh_35;thigh_0];
         incline={'i25'};
         knee_reparam = knee_interp(2,:);
         ankle_reparam = ankle_interp(2,:);
         
-        leg = ["20^o", "30^o", "35^o", "Unknown (25^o)"];
+        leg = ["20^o", "30^o", "35^o", "Unknown (25^o)","Level Ground Walking"];
         
         strIncline = "25^o"
         
@@ -525,12 +588,12 @@ switch leftOutInc
         thigh_sd =thigh_30sd;
         ankle_sd =ankle_30sd;
         knee_sd =knee_30sd;
-        thigh_traj = [thigh_20;thigh_25;thigh_35];
+        thigh_traj = [thigh_20;thigh_25;thigh_35;thigh_0];
         incline={'i30'};
         knee_reparam = knee_interp(3,:);
         ankle_reparam = ankle_interp(3,:);
         
-        leg = ["20^o", "25^o", "35^o", "Unknown (30^o)"];
+        leg = ["20^o", "25^o", "35^o", "Unknown (30^o)","Level Ground Walking"];
         
         strIncline = "30^o"
         
@@ -546,13 +609,13 @@ switch leftOutInc
         ankle_sd =ankle_35sd;
         knee_sd =knee_35sd;
         incline={'i35'};
-        thigh_traj = [thigh_20;thigh_25;thigh_30];
+        thigh_traj = [thigh_20;thigh_25;thigh_30;thigh_0];
         knee_reparam = knee_interp(4,:);
         ankle_reparam = ankle_interp(4,:);
         
         strIncline = "35^o";
         
-        leg = ["20^o", "25^o", "30^o", "Unknown (35^o)"];
+        leg = ["20^o", "25^o", "30^o", "Unknown (35^o)","Level Ground Walking"];
         
         knee_ref = knee_35;
         ankle_ref = ankle_35;
@@ -571,10 +634,10 @@ switch leftOutInc
         knee_reparam = knee_interp(1,:);
         ankle_reparam = ankle_interp(1,:);
         
-        leg = ["25^o", "30^o", "35^o", "Unknown (20^o)"];
+        leg = ["25^o", "30^o", "35^o", "Unknown (20^o)","Level Ground Walking"];
         
         strIncline = "20^o";
-        thigh_traj = [thigh_25;thigh_30;thigh_35];
+        thigh_traj = [thigh_25;thigh_30;thigh_35;thigh_0];
         knee_ref = knee_20;
         ankle_ref = ankle_20;
         %             load '../Data/filtStairTraj_i20.mat'
@@ -705,11 +768,11 @@ for i = 1:length(thigh_stream)
     
     if qh_max ~= temp_max
         xq = qh_max;
-        hk_incvc = .5*interp1(x,vkreal_incvc(1,:),xq,'linear','extrap')+.5*interp1(x,vkim_incvc(N/2,:),xq,'linear','extrap')*cos(pi*N_k*sh);
-        ha_incvc = .5*interp1(x,vareal_incvc(1,:),xq,'linear','extrap')+.5*interp1(x,vaim_incvc(N/2,:),xq,'linear','extrap')*cos(pi*N_a*sh);
+        hk_incvc = .5*interp1(x,vkreal_incvc(1,:),xq,'linear','extrap')+.5*interp1(x,vkim_incvc(N_k/2,:),xq,'linear','extrap')*cos(pi*N_k*sh);
+        ha_incvc = .5*interp1(x,vareal_incvc(1,:),xq,'linear','extrap')+.5*interp1(x,vaim_incvc(N_a/2,:),xq,'linear','extrap')*cos(pi*N_a*sh);
         
-        hk_inc = .5*interp1(x,vkreal_inc(1,:),xq,'linear','extrap')+.5*interp1(x,vkim_inc(N/2,:),xq,'linear','extrap')*cos(pi*N_k*sh);
-        ha_inc = .5*interp1(x,vareal_inc(1,:),xq,'linear','extrap')+.5*interp1(x,vaim_inc(N/2,:),xq,'linear','extrap')*cos(pi*N_a*sh);
+        hk_inc = .5*interp1(x,vkreal_inc(1,:),xq,'linear','extrap')+.5*interp1(x,vkim_inc(N_k/2,:),xq,'linear','extrap')*cos(pi*N_k*sh);
+        ha_inc = .5*interp1(x,vareal_inc(1,:),xq,'linear','extrap')+.5*interp1(x,vaim_inc(N_a/2,:),xq,'linear','extrap')*cos(pi*N_a*sh);
         
         hk_vc = .5*pk_real_vc(1) + .5*pk_real_vc(N_k/2)*cos(pi*N_k*sh);
         ha_vc = .5*pa_real_vc(1) + .5*pa_real_vc(N_a/2)*cos(pi*N_a*sh);
@@ -758,6 +821,7 @@ hold on
 plot(gc,thigh_traj(2,:),'linewidth',2)
 plot(gc,thigh_traj(3,:),'linewidth',2)
 plot(gc,thigh_stream,'--','linewidth',2)
+plot(gc,thigh_traj(4,:),'linewidth',2)
 grid on
 legend(leg)
 ylabel('Thigh Angle (^o)')
@@ -788,7 +852,7 @@ pk1 = fill(gc2,inBetween,[0.3010, 0.7450, 0.9330], 'linestyle','None');
 hold on
 pk2 = plot(gc, knee_stream,'linewidth',2,'color',[0, 0.4470, 0.7410]);
 pk3 = plot(gc, knee_incvc_est, '--','linewidth',2, 'color',[0.8500, 0.3250, 0.0980]);
-pk4 = plot(gc, knee_inc_est, ':','color','black','linewidth',2)
+pk4 = plot(gc, knee_inc_est, ':','color','black','linewidth',2);
 % xlabel('samples')
 ylabel('Knee Angle (^o)')
 title('Knee Joint Position')

@@ -25,7 +25,29 @@ leftOutInc = input(prompt);
 
 
 class(leftOutInc);
-
+% load '../Data/filtStairTraj_i20.mat'
+%
+% thigh_20 = thigh_mean;
+% knee_20 = knee_mean;
+% ankle_20 = ankle_mean;
+%
+% load '../Data/filtStairTraj_i25.mat'
+%
+% thigh_25 = thigh_mean';
+% knee_25 = knee_mean;
+% ankle_25 = ankle_mean;
+%
+% load '../Data/filtStairTraj_i30.mat'
+%
+% thigh_30 = thigh_mean';
+% knee_30 = knee_mean;
+% ankle_30 = ankle_mean;
+%
+% load '../Data/filtStairTraj_i35.mat'
+%
+% thigh_35 = thigh_mean';
+% knee_35 = knee_mean;
+% ankle_35 = ankle_mean;
 
 incline={'i20'};
 
@@ -47,31 +69,39 @@ incline={'i35'};
 
 L = length(thigh_20);
 
+%% Load Walking Trajectories
+sub={'AB01','AB02','AB03','AB04','AB05','AB06','AB07','AB08','AB09','AB10'};
+trial={'s1'};
+incline={'i10'};
+[thigh_10, knee_10, ankle_10, thigh_10sd, knee_10sd, ankle_10sd] = averageJointKinematics_Walk(Normalized,sub,trial,incline);
+
+figure
+plot(thigh_10)
 
 %% Parameterize Joint Trajectories as functions of Phase
 current_incline = '20^o';
-for ind = 1:4
+for ind = 1:5
     
     switch ind
-        case 1
+        case 2
             %             load '../Data/filtStairTraj_i20'
             thigh_mean = thigh_20;
             knee_mean = knee_20;
             ankle_mean = ankle_20;
             current_incline = '20^o';
-        case 2
+        case 3
             %             load '../Data/filtStairTraj_i25'
             thigh_mean = thigh_25;
             knee_mean = knee_25;
             ankle_mean = ankle_25;
             current_incline = '25^o';
-        case 3
+        case 4
             %             load '../Data/filtStairTraj_i30'
             thigh_mean = thigh_30;
             knee_mean = knee_30;
             ankle_mean = ankle_30;
             current_incline = '30^o';
-        case 4
+        case 5
             %             load '../Data/filtStairTraj_i35'
             thigh_mean = thigh_35;
             knee_mean = knee_35;

@@ -39,19 +39,34 @@ load '../Data/dataset_Riener.mat'
 
 
 
-load vGRFAscent.mat
+% load vGRFAscent.mat
+% 
+% 
+% vGRF = vGRFAscent(:,2);
+% 
+% vGRF= interp1(1:length(vGRF), vGRF, 1:length(vGRF)/639:length(vGRF));
+% 
+% vGRF = [vGRF vGRF(end)*ones(1,1000-length(vGRF))];
+% time = riener.stairAscent.knee.time;
+% figure
+% plot(vGRF)
+% 
+% riener.stairAscent.GRF.vertical = vGRF';
+% riener.stairAscent.GRF.time = time;
+
+load vGRFDescent.mat
 
 
-vGRF = vGRFAscent(:,2);
+vGRF = vGRFDescent(:,2);
 
 vGRF= interp1(1:length(vGRF), vGRF, 1:length(vGRF)/639:length(vGRF));
 
 vGRF = [vGRF vGRF(end)*ones(1,1000-length(vGRF))];
-time = riener.stairAscent.knee.time;
+time = riener.stairDescent.knee.time;
 figure
 plot(vGRF)
 
-riener.stairAscent.GRF.vertical = vGRF';
-riener.stairAscent.GRF.time = time;
+riener.stairDescent.GRF.vertical = vGRF';
+riener.stairDescent.GRF.time = time;
 
 save ../Data/dataset_Riener.mat riener

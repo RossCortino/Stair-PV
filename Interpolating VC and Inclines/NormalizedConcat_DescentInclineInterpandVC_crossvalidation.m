@@ -9,6 +9,8 @@ if ~exist('Normalized')
     load '../Data/Normalized.mat'
 end
 
+sub={'AB01','AB02','AB03','AB04','AB05','AB06','AB07','AB08','AB09','AB10'};
+trial={'s3'};
 % if ~exist('Streaming')
 %     load ../Data/Streaming.mat
 % end
@@ -18,56 +20,67 @@ leftOutInc = input(prompt);
 
 
 class(leftOutInc)
-load '../Data/filtStairTraj_d20.mat'
+incline={'in20'};
 
+[thigh_20, knee_20, ankle_20, thigh_20sd, knee_20sd, ankle_20sd] = averageJointKinematics_Stair(Normalized,sub,trial,incline);
 
+incline={'in25'};
 
-thigh_20 = thigh_mean';
-knee_20 = knee_mean';
-ankle_20 = ankle_mean';
+[thigh_25, knee_25, ankle_25, thigh_25sd, knee_25sd, ankle_25sd] = averageJointKinematics_Stair(Normalized,sub,trial,incline);
 
-load '../Data/filtStairTraj_d25.mat'
+incline={'in30'};
 
-thigh_25 = thigh_mean';
-knee_25 = knee_mean';
-ankle_25 = ankle_mean';
+[thigh_30, knee_30, ankle_30, thigh_30sd, knee_30sd, ankle_30sd] = averageJointKinematics_Stair(Normalized,sub,trial,incline);
 
-load '../Data/filtStairTraj_d30.mat'
+incline={'in35'};
 
-thigh_30 = thigh_mean';
-knee_30 = knee_mean';
-ankle_30 = ankle_mean';
+[thigh_35, knee_35, ankle_35, thigh_35sd, knee_35sd, ankle_35sd] = averageJointKinematics_Stair(Normalized,sub,trial,incline);
 
-load '../Data/filtStairTraj_d35.mat'
-
-thigh_35 = thigh_mean';
-knee_35 = knee_mean';
-ankle_35 = ankle_mean';
-
-
+t = linspace(0,100,length(thigh_20));
+figure
+plot(t, thigh_20)
+hold on
+plot(t, thigh_25)
+plot(t, thigh_30)
+plot(t, thigh_35)
 
 L = length(thigh_20);
 
 
 %% Parameterize Joint Trajectories as functions of Phase
-current_incline = '-20^o';
+current_incline = '20^o';
 for ind = 1:4
     
     switch ind
         case 1
-            load '../Data/filtStairTraj_d20'
-            current_incline = '-20^o';
+            %             load '../Data/filtStairTraj_i20'
+            thigh_mean = thigh_20;
+            knee_mean = knee_20;
+            ankle_mean = ankle_20;
+            current_incline = '-20^o'
         case 2
-            load '../Data/filtStairTraj_d25'
-            current_incline = '-25^o';
+            %             load '../Data/filtStairTraj_i25'
+            thigh_mean = thigh_25;
+            knee_mean = knee_25;
+            ankle_mean = ankle_25;
+            current_incline = '-25^o'
         case 3
-            load '../Data/filtStairTraj_d30'
-            current_incline = '-30^o';
+            %             load '../Data/filtStairTraj_i30'
+            thigh_mean = thigh_30;
+            knee_mean = knee_30;
+            ankle_mean = ankle_30;
+            current_incline = '-30^o'
         case 4
-            load '../Data/filtStairTraj_d35'
+            %             load '../Data/filtStairTraj_i35'
+            thigh_mean = thigh_35;
+            knee_mean = knee_35;
+            ankle_mean = ankle_35;
             current_incline = '-35^o';
         otherwise
-            load '../Data/filtStairTraj_d20'
+            %             load '../Data/filtStairTraj_i20'
+            thigh_mean = thigh_20;
+            knee_mean = knee_20;
+            ankle_mean = ankle_20;
             current_incline = '-20^o';
     end
     
@@ -82,15 +95,50 @@ for ind = 1:4
     qh_max = max(thigh_mean);
     qh_min = min(thigh_mean);
     ix = 1:100;
-    q_po = 10;%thigh_mean(find(ankle_mean(ix)==max(ankle_mean(ix))))
+    q_po = 7;%thigh_mean(find(ankle_mean(ix)==max(ankle_mean(ix))))
     
-    figure
+    %peak detection parameters
+    %threshold and min distance
+    thresh = .00001;
+    minpeakh = 15;
+    minpeakd = 50;
+    mhf = 0;
+    temp_traj = [];
+    ypeak = [];
+    xpeak = [];
+    pv_swing_thresh = .90;
+    
+    
+
     
     
     pv = zeros(1,length(thigh_mean));
     t = linspace(0,100,length(thigh_mean));
     c = t(find(thigh_mean == min(thigh_mean)))/100;
+    q_po = 7;
     
+    %peak detection parameters
+    %threshold and min distance
+    thresh = .00001;
+    minpeakh = 15;
+    minpeakd = 50;
+    mhf = 0;
+    temp_traj = [];
+    ypeak = [];
+    xpeak = [];
+    
+    
+    %peak detection parameters
+    %threshold and min distance
+    thresh = .0000001;
+    minpeakh_mhe = 6;
+    minpeakd_mhe = 6;
+    thigh_start_mhe = 7;
+    mhe = 0;
+    temp_traj_MHE = [];
+    pv_swing_thresh = .90;
+    ytrough = [];
+    xtrough = [];
     
     for i = 1:length(t)
         
@@ -98,10 +146,43 @@ for ind = 1:4
         thighd = thighd_mean(i);
         
         
-        [currPV,currState,sm,qhm] = calculatePhaseVariable_Stair_Normalized(thigh, thighd, qh_min, qh_max,q_po, c, prevState,prevPV, sm, qhm);
         
-        
-        
+        if prevState == 2|| prevState == 3
+            temp_traj_MHE = [temp_traj_MHE -thigh];
+            if length(temp_traj_MHE) > 3
+                [pks_MHE,locs_MHE] = findpeaks(temp_traj_MHE,'threshold', thresh,'MinPeakHeight',-minpeakh_mhe);
+                if ~isempty(pks_MHE)
+                    temp_traj_MHE = [];
+                    ytrough = -[ytrough pks_MHE];
+                    xtrough = [xtrough i-1];
+                    mhe = 1;
+                    
+                end
+            end
+            
+            
+        end
+        if prevState == 3 || prevState == 4
+            if thigh > 15 %&& i-p > minpeakd
+                temp_traj = [temp_traj thigh];
+                if length(temp_traj) > 3
+                    temp_traj;
+                    [pks,locs] = findpeaks(temp_traj,'threshold', thresh,'MinPeakHeight',minpeakh);
+                    if ~isempty(pks)
+                        p = i-1;
+                        temp_traj = [];
+                        ypeak = [ypeak pks];
+                        xpeak = [xpeak p];
+                        temp_max = qh_max;
+                        qh_max = mean([ypeak max(thigh_mean)]);
+                        mhf = 1;
+                    end
+                end
+                
+            end
+        end
+        %
+        [currPV,currState,sm,qhm] = calculatePhaseVariable_Stair(thigh, thighd, qh_min, qh_max,q_po, c, prevState,prevPV, sm, qhm,mhf, pv_swing_thresh);
         %
         
         
@@ -111,40 +192,17 @@ for ind = 1:4
         
     end
     
+    figure
     
-%     figure
-%     plot(t,pv)
-%     xlabel('Normalized Time')
-%     ylabel('Phase Variable')
-%     
-%     figure
-%     plot(t,thigh_mean,t,ankle_mean)
-    
-    pv = unique(pv,'stable');
-    pv = smooth(interp1(1:length(pv), pv, 1:length(pv)/151:length(pv)))';
+    plot(t,pv)
+    xlabel('Normalized Time')
+    ylabel('Phase Variable')
     
     T(ind,:) = interp1(pv,t/100,pv,'linear','extrap');
     knee_interp(ind,:) = interp1(pv,knee_mean,T(ind,:),'linear','extrap');
     ankle_interp(ind,:) = interp1(pv, ankle_mean, T(ind,:),'linear','extrap');
     knee_traj(ind,:) = knee_mean;
     ankle_traj(ind,:) = ankle_mean;
-    
-%     L = length(knee_interp(ind,:));
-%     fs = 100;
-%     %     f = fs*(0:(L/2))/L;
-%     fc = 3.75;
-% 
-%     [b,a] = butter(2,fc/(fs/2),'low');
-%     alpha = .4;
-% 
-%     knee_interp(ind,:) = firstOrderLowpass(knee_interp(ind,:),alpha);% filtfilt(b,a,knee_interp(ind,:));
-% 
-%     beta = .375;
-% %     [b,a] = butter(2,fc/(fs/2),'low');
-% 
-%     ankle_interp(ind,:) = firstOrderLowpass(ankle_interp(ind,:),beta);% filtfilt(b,a,ankle_interp(ind,:));
-%     
-%     pv = [];
     
 end
 
@@ -173,8 +231,8 @@ ankle_35_dec = ankle_traj(4,:);
 % Coefficients incline and vc interp
 L = length(knee_20);
 N = 120;
-N_k = 20;
-N_a = 20;
+N_k = 12;
+N_a = 14;
 switch leftOutInc
     case 1 %20
         pk_real25_decvc = real(fft(knee_25_decvc)/(L/2));
@@ -424,6 +482,12 @@ trial={'s3'};
 switch leftOutInc
     case 1
         thigh_ref = thigh_20;
+        knee_ref = knee_20;
+        ankle_ref = ankle_20;
+        
+        thigh_sd =thigh_20sd;
+        ankle_sd =ankle_20sd;
+        knee_sd =knee_20sd;
         thigh_traj = [thigh_25;thigh_30;thigh_35];
         incline={'in20'};
         knee_reparam = knee_interp(1,:);
@@ -438,6 +502,13 @@ switch leftOutInc
         %             load '../Data/filtStairTraj_i20.mat'
     case 2
         thigh_ref = thigh_25;
+        knee_ref = knee_25;
+        ankle_ref = ankle_25;
+        
+        thigh_sd =thigh_25sd;
+        ankle_sd =ankle_25sd;
+        knee_sd =knee_25sd;
+        
         thigh_traj = [thigh_20;thigh_30;thigh_35];
         incline={'in25'};
         knee_reparam = knee_interp(2,:);
@@ -452,6 +523,12 @@ switch leftOutInc
         %             load '../Data/filtStairTraj_i25.mat'
     case 3
         thigh_ref = thigh_30;
+        knee_ref = knee_30;
+        ankle_ref = ankle_30;
+        
+        thigh_sd =thigh_30sd;
+        ankle_sd =ankle_30sd;
+        knee_sd =knee_30sd;
         thigh_traj = [thigh_20;thigh_25;thigh_35];
         incline={'in30'};
         knee_reparam = knee_interp(3,:);
@@ -466,12 +543,18 @@ switch leftOutInc
         %             load '../Data/filtStairTraj_i30.mat'
     case 4
         thigh_ref = thigh_35;
+        knee_ref = knee_35;
+        ankle_ref = ankle_35;
+        
+        thigh_sd =thigh_35sd;
+        ankle_sd =ankle_35sd;
+        knee_sd =knee_35sd;
         incline={'in35'};
         thigh_traj = [thigh_20;thigh_25;thigh_30];
         knee_reparam = knee_interp(4,:);
         ankle_reparam = ankle_interp(4,:);
         
-        strIncline = "-35^o"
+        strIncline = "-35^o";
         
         leg = ["-20^o", "-25^o", "-30^o", "Unknown (-35^o)"];
         
@@ -480,13 +563,21 @@ switch leftOutInc
         %             load '../Data/filtStairTraj_i35.mat'
     otherwise
         thigh_ref = thigh_20;
+        knee_ref = knee_20;
+        ankle_ref = ankle_20;
+        
+        thigh_sd =thigh_20sd;
+        ankle_sd =ankle_20sd;
+        knee_sd =knee_20sd;
+        
+        
         incline={'in20'};
         knee_reparam = knee_interp(1,:);
         ankle_reparam = ankle_interp(1,:);
         
         leg = ["-25^o", "-30^o", "-35^o", "Unknown (-20^o)"];
         
-        strIncline = "-20^o"
+        strIncline = "-20^o";
         thigh_traj = [thigh_25;thigh_30;thigh_35];
         knee_ref = knee_20;
         ankle_ref = ankle_20;
@@ -524,14 +615,14 @@ pa_im = imag(Y_a/(L/2));
 
 
 
-[thigh_mean,knee_mean,ankle_mean] = averageJointKinematics(Normalized,sub,trial,incline);
+[thigh_mean,knee_mean,ankle_mean] = averageJointKinematics_Stair(Normalized,sub,trial,incline);
 
-trial={'s1'};
-[thigh_s1,knee_s1,ankle_s1] = averageJointKinematics(Normalized,sub,trial,incline);
-
-trial={'s3'};
-[thigh_s3,knee_s3,ankle_s3] = averageJointKinematics(Normalized,sub,trial,incline);
-
+% trial={'s1'};
+% [thigh_s1,knee_s1,ankle_s1] = averageJointKinematics(Normalized,sub,trial,incline);
+%
+% trial={'s3'};
+% [thigh_s3,knee_s3,ankle_s3] = averageJointKinematics(Normalized,sub,trial,incline);
+%
 
 
 thigh_stream = thigh_ref;%thigh_s3'% smooth([thigh_s1 thigh_s3],10)';
@@ -551,41 +642,61 @@ c_35 = t(find(thigh_35 == min(thigh_35)));
 c = mean([c_20 c_25 c_30 c_35]);
 
 
-% figure
-% plot(t,thigh_20)
-% hold on
-% plot(t,thigh_25)
-% plot(t,thigh_30)
-% plot(t,thigh_35)
+
+qh_max = max(thigh_stream);
+qh_min = min(thigh_stream);
+q_po = 7;
 
 %peak detection parameters
 %threshold and min distance
-thresh = .00001;
-minpeakh = 20;
+% thresh = .00001;
+minpeakh = 15;
 minpeakd = 50;
-
-xpeak = [];
-ypeak = [];
-temp_traj = [];
-p = 1;
 mhf = 0;
-% Add minimum hip flexion detection as well
-qh_min = min(thigh_ref);
-qh_max = max(thigh_ref);
-temp_min = 0;
+temp_traj = [];
+ypeak = [];
+xpeak = [];
 
-sh = sym('sh');
 
-gc = linspace(0,100,length(thigh_stream));
+%peak detection parameters
+%threshold and min distance
+thresh = .0000001;
+minpeakh_mhe = 6;
+minpeakd_mhe = 6;
+thigh_start_mhe = 7;
+mhe = 0;
+temp_traj_MHE = [];
+pv_swing_thresh = .94;
+ytrough = [];
+xtrough = [];
+new_min = 0;
 
-knee_est = [];
-%Calculate Phase Variable
-for i = 1:length(thigh_stream)
+syms sh
+for i = 1:length(t)
+    
     thigh = thigh_stream(i);
     thighd = thighd_stream(i);
     
+    
+    
+    if prevState == 2|| prevState == 3
+        temp_traj_MHE = [temp_traj_MHE -thigh];
+        if length(temp_traj_MHE) > 3
+            [pks_MHE,locs_MHE] = findpeaks(temp_traj_MHE,'threshold', thresh,'MinPeakHeight',-minpeakh_mhe);
+            if ~isempty(pks_MHE)
+                temp_traj_MHE = [];
+                ytrough = -[ytrough pks_MHE];
+                xtrough = [xtrough i-1];
+                new_min = mean(ytrough);
+                mhe = 1;
+                
+            end
+        end
+        
+        
+    end
     if prevState == 3 || prevState == 4
-        if thigh > 20 %&& i-p > minpeakd
+        if thigh > 15 %&& i-p > minpeakd
             temp_traj = [temp_traj thigh];
             if length(temp_traj) > 3
                 temp_traj;
@@ -596,27 +707,26 @@ for i = 1:length(thigh_stream)
                     ypeak = [ypeak pks];
                     xpeak = [xpeak p];
                     temp_max = qh_max;
-                    qh_max = mean([ypeak max(thigh_mean)]);
-                    mhf = 1;
-                    
-                    %                 plot(1:i-1,pv)
-                    %                 ylabel('phasevariable')
-                    %                 title('PV Streaming')
-                    %                 hold on
+                    qh_max = mean([ypeak max(thigh_stream)]);
+                    mhf = 1
                 end
             end
-
+            
         end
     end
-    [currPV,currState,sm,qhm,mhf] = calculatePhaseVariable_Stair(thigh, thighd, qh_min, qh_max,q_po, c, prevState,prevPV, sm, qhm,mhf);
+    %
+    [currPV,currState,sm,qhm] = calculatePhaseVariable_Stair(thigh, thighd, qh_min, qh_max,q_po, c, prevState,prevPV, sm, qhm,mhf, pv_swing_thresh);
+    %
+    
+    
     s(i) = currPV;
     prevState = currState;
     state(i) = currState;
     prevPV = currPV;
     
+
     
-    
-    if qh_min ~= temp_min
+    if qh_min ~= new_min
         xq = qh_min;
         hk_decvc = .5*interp1(x,vkreal_decvc(1,:),xq,'linear','extrap')+.5*interp1(x,vkim_decvc(N/2,:),xq,'linear','extrap')*cos(pi*N_k*sh);
         ha_decvc = .5*interp1(x,vareal_decvc(1,:),xq,'linear','extrap')+.5*interp1(x,vaim_decvc(N/2,:),xq,'linear','extrap')*cos(pi*N_a*sh);
@@ -627,8 +737,8 @@ for i = 1:length(thigh_stream)
         hk_vc = .5*pk_real_vc(1) + .5*pk_real_vc(N_k/2)*cos(pi*N_k*sh);
         ha_vc = .5*pa_real_vc(1) + .5*pa_real_vc(N_a/2)*cos(pi*N_a*sh);
         
-        hk = .5*pk_real(1) + .5*pk_real(N_k/2)*cos(pi*N_k*sh);
-        ha = .5*pa_real(1) + .5*pa_real(N_a/2)*cos(pi*N_a*sh);
+        hk = .5*pk_real(1) + .5*pk_real(N_k/2+1)*cos(pi*N_k*sh);
+        ha = .5*pa_real(1) + .5*pa_real(N_a/2+1)*cos(pi*N_a*sh);
         
         for k = 1:N_k/2-1
             hk = hk + pk_real(k+1)*cos(2*pi*(k)*sh)-pk_im(k+1)*sin(2*pi*(k)*sh);
@@ -644,6 +754,7 @@ for i = 1:length(thigh_stream)
             ha_dec = ha_dec + interp1(x,vareal_dec(a+1,:),xq,'linear','extrap')*cos(2*pi*(a)*sh)-interp1(x,vaim_dec(a+1,:),xq,'linear','extrap')*sin(2*pi*(a)*sh);
         end
         temp_max = qh_max;
+        qh_min = new_min;
     end
     knee_decvc_est(i) = double(subs(hk_decvc, sh, s(i)));
     ankle_decvc_est(i) = double(subs(ha_decvc, sh, s(i)));
@@ -663,6 +774,7 @@ end
 
 samples = 1:length(thigh_stream);
 
+gc = linspace(0,100,length(t));
 figure
 sgtitle(strcat("Decline Stair Walking Cross Validation: Leave Out ",num2str(strIncline)))
 subplot(411)
@@ -686,36 +798,50 @@ ylabel('State')
 title('Phase/State')
 grid on
 
-kfiltcoeff = .3;
-afiltcoeff = .5;
 
 subplot(413)
 
-plot(gc, knee_stream,'linewidth',2)
+
+k1 = knee_stream+knee_sd;
+k2 = knee_stream-knee_sd;
+
+gc2 = [gc, fliplr(gc)];
+inBetween = [k1,fliplr(k2)];
+pk1 = fill(gc2,inBetween,[0.3010, 0.7450, 0.9330], 'linestyle','None');
 hold on
-plot(gc, knee_decvc_est, '--','linewidth',2)
-plot(gc, knee_dec_est, ':','color','black','linewidth',2)
+pk2 = plot(gc, knee_stream,'linewidth',2,'color',[0, 0.4470, 0.7410]);
+pk3 = plot(gc, knee_decvc_est, '--','linewidth',2, 'color',[0.8500, 0.3250, 0.0980]);
+pk4 = plot(gc, knee_dec_est, ':','color','black','linewidth',2);
 % xlabel('samples')
 ylabel('Knee Angle (^o)')
 title('Knee Joint Position')
-legend('Raw','Est(Inc and VC interp)','Est(Inc interp Only)','Location','Southeast')
+legend([pk2,pk3,pk4],'Raw','Est(Inc and VC interp)','Est(Inc interp Only)','Location','Southeast')
 grid on
 kneeRMSE_incvc = RMSE(knee_decvc_est,knee_stream)
 kneeRMSE_inc = RMSE(knee_dec_est,knee_stream)
 
 subplot(414)
 
-plot(gc, ankle_stream,'linewidth',2)
+a1 = ankle_stream+ankle_sd;
+a2 = ankle_stream-ankle_sd;
+
+gc2 = [gc, fliplr(gc)];
+inBetween = [a1,fliplr(a2)];
+pa1 = fill(gc2,inBetween,[0.3010, 0.7450, 0.9330], 'linestyle','None');
 hold on
-plot(gc, ankle_decvc_est,'--','linewidth',2)
-plot(gc, ankle_dec_est,':','color','black','linewidth',2)
-legend('Raw','Est(Inc and VC interp)','Est(Inc interp Only)','Location','Southeast')
+pa2 = plot(gc, ankle_stream,'linewidth',2,'color',[0, 0.4470, 0.7410]);
+pa3 = plot(gc, ankle_decvc_est,'--','linewidth',2, 'color',[0.8500, 0.3250, 0.0980]);
+pa4 = plot(gc, ankle_dec_est,':','color','black','linewidth',2);
+legend([pa2,pa3,pa4],'Raw','Est(Inc and VC interp)','Est(Inc interp Only)','Location','Southeast')
 ylabel('Ankle Angle (^o)')
 xlabel('Gait Cycle (%)','FontWeight','bold')
 title('Ankle Joint Position')
-% ankleRMSE_incvc = RMSE(ankle_incvc_est,ankle_stream)
-% ankleRMSE_inc = RMSE(ankle_inc_est,ankle_stream)
+ankleRMSE_incvc = RMSE(ankle_decvc_est,ankle_stream)
+ankleRMSE_inc = RMSE(ankle_dec_est,ankle_stream)
 grid on
+
+
+
 
 
 

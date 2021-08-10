@@ -2,7 +2,7 @@ clearvars -except Streaming Normalized R01 rawR01;
 close all
 clc;
 
-
+addpath('Utility Functions')
 load ../Data/dataset_Riener.mat
 
 mass = 76.7;
