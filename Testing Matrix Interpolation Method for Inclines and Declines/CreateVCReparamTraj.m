@@ -173,16 +173,12 @@ for ind = 1:5
     
     
     figure
-    yyaxis left
     plot(t,pv)
-    hold on
-    yyaxis right
-    plot(t,thigh_mean)
     xlabel('Normalized Time')
     ylabel('Phase Variable')
     
-%     figure
-%     plot(t,thigh_mean,t,ankle_mean)
+    figure
+    plot(t,thigh_mean,t,ankle_mean)
     
 %     pv = unique(pv,'stable');
 %     pv = smooth(interp1(1:length(pv), pv, 1:length(pv)/151:length(pv)))';

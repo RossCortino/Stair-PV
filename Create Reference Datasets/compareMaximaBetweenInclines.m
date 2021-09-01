@@ -1,4 +1,6 @@
-
+clearvars -except Streaming Normalized R01 rawR01 X;
+close all
+clc;
 addpath('../Utility Functions')
 sub={'AB01','AB02','AB03','AB04','AB05','AB06','AB07','AB08','AB09','AB10'};
 trial={'s3'};
@@ -48,9 +50,27 @@ incline={'i0'};
 t = linspace(0,100,length(thigh_20));
 
 figure
-plot(t, thigh_35);
+title('Range of Motion');
+plot(35,max(thigh_35)-min(thigh_35),'*');
 hold on
-plot(t, thigh_30);
+plot(30,max(thigh_30)-min(thigh_30),'*');
+plot(25,max(thigh_25)-min(thigh_25),'*');
+plot(20,max(thigh_20)-min(thigh_20),'*');
+
+plot(0,max(thigh_0)-min(thigh_0),'*');
+plot(-20,max(thigh_d20)-min(thigh_d20),'*');
+plot(-25,max(thigh_d25)-min(thigh_d25),'*');
+plot(-30,max(thigh_d30)-min(thigh_d30),'*');
+plot(-35,max(thigh_d35)-min(thigh_d35),'*');
+xlabel('Incline')
+ylabel('Thigh ROM')
+legend('35^o','30^o','25^o','20^o','0^o','-20^o','-25^o','-30^o','-35^o')
+grid on
+
+figure
+plot(35, thigh_35);
+hold on
+plot(20, thigh_30);
 plot(t, thigh_25);
 plot(t, thigh_20);
 
@@ -60,6 +80,8 @@ plot(t, thigh_d20);
 plot(t, thigh_d25);
 plot(t, thigh_d30);
 plot(t, thigh_d35);
+
+
 
 legend('35^o','30^o','25^o','20^o','0^o','-20^o','-25^o','-30^o','-35^o')
 
