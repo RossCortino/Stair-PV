@@ -1,10 +1,10 @@
-function [currPV,currState,sm,qhm,mhf] = calculatePhaseVariable_Stair(thigh, thighd, qh_min, qh_max,qpo, c, prevState,prevPV, sm, qhm,mhf,pv_swing_thresh)
+function [currPV,currState,sm,qhm,mhf] = calculatePhaseVariable_Walk(thigh, thighd, qh_min, qh_max,qpo, c, prevState,prevPV, sm, qhm,mhf,pv_swing_thresh)
 
 
 
 
 
-    if prevPV >= pv_swing_thresh %&& prevPV < 1
+    if prevPV >= pv_swing_thresh && prevPV < 1
         FC = 0;
     else
         FC = 1;
@@ -18,12 +18,12 @@ function [currPV,currState,sm,qhm,mhf] = calculatePhaseVariable_Stair(thigh, thi
 %     prevState
 
     if prevState == 1
-        currPV = descendingPV;
+        currPV = max(prevPV,descendingPV);
         if (thigh < qpo && FC == 1)
             currState=2;
         end
     elseif prevState == 2
-        currPV = descendingPV;
+        currPV = max(prevPV,descendingPV);
         if (thighd > 0)
             currState = 3;
             sm = descendingPV;

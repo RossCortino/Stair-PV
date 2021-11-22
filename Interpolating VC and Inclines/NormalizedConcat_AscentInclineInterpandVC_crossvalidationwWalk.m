@@ -4,7 +4,7 @@ clearvars -except Streaming Normalized R01 rawR01;
 close all
 clc;
 
-
+addpath("../Utility Functions")
 if ~exist('Normalized')
     load '../Data/Normalized.mat'
 end

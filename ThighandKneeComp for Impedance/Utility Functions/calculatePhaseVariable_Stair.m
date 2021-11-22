@@ -4,7 +4,7 @@ function [currPV,currState,sm,qhm,mhf] = calculatePhaseVariable_Stair(thigh, thi
 
 
 
-    if prevPV >= pv_swing_thresh %&& prevPV < 1
+    if prevPV >= pv_swing_thresh && prevPV < 1
         FC = 0;
     else
         FC = 1;

@@ -86,23 +86,23 @@ for ind = 1:4
     ankle_interp = interp1(pv, ankle_mean, T(ind,:),'linear','extrap');
     
     L = length(knee_interp);
-    fs = 150;
-%     f = fs*(0:(L/2))/L;
-    fc = 6;
-
-    [b,a] = butter(2,fc/(fs/2),'low');
-
-    knee_interp = filtfilt(b,a,knee_interp);
-    
-    fc = 6;
-
-    [b,a] = butter(2,fc/(fs/2),'low');
-    
-    ankle_interp = filtfilt(b,a,ankle_interp);
-
-    
-    figure
-    plot(t,pv)
+%     fs = 150;
+% %     f = fs*(0:(L/2))/L;
+%     fc = 6;
+% 
+%     [b,a] = butter(2,fc/(fs/2),'low');
+% 
+%     knee_interp = filtfilt(b,a,knee_interp);
+%     
+%     fc = 6;
+% 
+%     [b,a] = butter(2,fc/(fs/2),'low');
+%     
+%     ankle_interp = filtfilt(b,a,ankle_interp);
+% 
+%     
+%     figure
+%     plot(t,pv)
     
     % calculate knee
     Y_k = fft(knee_interp);

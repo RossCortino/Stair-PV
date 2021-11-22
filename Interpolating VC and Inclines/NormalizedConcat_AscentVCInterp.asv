@@ -147,9 +147,6 @@ f = 116*(0:(L/2))/L;
 pa_real = real(Y_a/(L/2));
 pa_im = imag(Y_a/(L/2));
 
-N_k = 14
-N_a = 14;
-syms sh
 
 hk = .5*pk_real(1) + .5*pk_real(N_k/2)*cos(pi*N_k*sh);
 ha = .5*pa_real(1) + .5*pa_real(N_a/2)*cos(pi*N_a*sh);
@@ -168,8 +165,7 @@ ankle_est = double(subs(ha, sh, pv));
 figure
 
 plot(t,ankle_est)
-hold on
-plot(t,ankle_30)
+ho
 % %% Subject Streaming Data Test
 % 
 % sub={'AB01','AB02','AB03', 'AB04', 'AB05', 'AB06', 'AB07', 'AB08', 'AB09', 'AB10'};
