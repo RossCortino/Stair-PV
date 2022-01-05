@@ -7,12 +7,30 @@ addpath("Utility Functions")
 if ~exist('Normalized')
     load '../Data/Normalized.mat'
 end
-
-incline={'in30'};
-
+indigo = [0 119 187]/255;
+% blue = [0 119 187]/255;
+cyan = [136 204 238]/255;
+teal = [68 170 153]/255;
+green = [17 119 51]/255;
+olive = [153 153 51]/255;
+sand = [221 204 119]/255;
+rose = [204 102 119]/255;
+wine = [136 34 85]/255;
+purple = [170 68 153]/255;
+palegrey = [221,221,221]/255;
+incline={'in25'};
+trial={'s3'};
+sub={'AB01','AB02','AB03','AB04','AB05','AB06','AB07','AB08','AB09','AB10'};
 [thigh_d30, knee_d30, ankle_d30, thigh_d30sd, knee_d30sd, ankle_d30sd] = averageJointKinematics_Stair(Normalized,sub,trial,incline);
 
+
+thigh_d30 = interp1(1:length(thigh_d30), thigh_d30, 1:length(thigh_d30)/(503):length(thigh_d30));
+knee_d30 = interp1(1:length(knee_d30), knee_d30, 1:length(knee_d30)/(503):length(knee_d30));
 thigh_d30_shift = circshift(thigh_d30,-find(thigh_d30 == max(thigh_d30)));
+
+thigh_shift = smooth(thigh_d30_shift,85)'
+
+knee_shift = smooth(circshift(knee_d30,-find(thigh_d30 == max(thigh_d30))))'
 
 gc = linspace(0,100,length(thigh_d30));
 t = linspace(0,1,length(gc));
@@ -24,10 +42,10 @@ knee_mean = knee_d30;
 ankle_mean = ankle_d30;
 current_incline = '-30^o';
 q_po = 7;
-pv_swing_thresh = .96;
+pv_swing_thresh = .85;
 c= c_d30;
 
-thighd_mean = ddt(thigh_mean);
+thighd_mean = ddt(thigh_shift);
 prevPV = 0;
 prevState = 1;
 sm = 0;
@@ -64,7 +82,7 @@ xtrough = [];
 state =[]
 for i = 1:length(t)
         
-        thigh = thigh_mean(i);
+        thigh = thigh_shift(i);
         thighd = thighd_mean(i);
         
         
@@ -120,26 +138,94 @@ for i = 1:length(t)
         state(i) = currState;
 end
 
+knee_interp = interp1(pv,knee_shift,t,'linear','extrap');
 
-fs = 1/100;
+
+Y_k = fft(knee_interp);
+L = length(Y_k);
+pk_real = real(Y_k/(L/2));
+pk_im = imag(Y_k/(L/2));
+
+syms s
+N_k = 12
+
+hk_shift = .5*pk_real(1) + .5*pk_real(N_k/2+1)*cos(pi*N_k*s);
+
+
+for k = 1:N_k/2-1
+
+    hk_shift = hk_shift + (pk_real(k+1)*cos(2*pi*k*s) - pk_im(k+1)*sin(2*pi*k*s));
+    
+end
+
 figure
-subplot(411)
-plot(gc,thigh_mean)
+plot(gc,thigh_shift,"linewidth",2,'color',indigo)
 xlabel("Gait Cycle (%)")
-ylabe
+ylabel("Thigh Angle (^o)")
+xline(gc(301+140),"k--","linewidth",2)
+set(gca,'FontSize',15)
 grid on
-subplot(412)
-plot(gc,pv)
+
+
+figure
+plot(gc,knee_shift,'--',"linewidth",2,'color',indigo)
+hold on
+plot(gc,subs(hk_shift,s,pv),"linewidth",2,'color',teal)
 xlabel("Gait Cycle (%)")
+ylabel("Knee Angle (^o)")
+xline(gc(301+140),"k--","linewidth",2)
+set(gca,'FontSize',15)
+legend("Ref.","Est.",'location','northwest')
 grid on
-subplot(413)
-plot(gc,state)
+knee_est = double(subs(hk_shift,s,pv));
+rmse_knee = RMSE(knee_est,knee_shift)
+
+figure
+plot(gc,pv,"linewidth",2,'color',indigo)
 xlabel("Gait Cycle (%)")
+ylabel("Phase")
+xline(gc(301+140),"k--","linewidth",2)
+set(gca,'FontSize',15)
 grid on
-subplot(414)
-plot(gc,ddt(knee_30,fs)./ddt(thigh_30,fs),"linewidth",2)
+fs = 1/100;
+
+figure
+plot(gc,ddt(knee_shift,fs)./ddt(thigh_shift,fs),"linewidth",2,'color',indigo)
 ylabel("Knee_{vel}/Thigh_{vel}")
 xlabel("Gait Cycle (%)")
-xline(60,"k--","linewidth",2)
+xline(gc(301+140),"k--","linewidth",2)
+set(gca,'FontSize',15)
+grid on
+
+figure
+subplot(511)
+plot(gc,thigh_shift,"linewidth",2)
+xlabel("Gait Cycle (%)")
+ylabel("Thigh Angle (^o)")
+xline(gc(90+42),"r--","linewidth",2)
+grid on
+subplot(512)
+plot(gc,knee_shift,"linewidth",2)
+xlabel("Gait Cycle (%)")
+ylabel("Knee Angle (^o)")
+xline(gc(90+42),"r--","linewidth",2)
+grid on
+subplot(513)
+plot(gc,pv,"linewidth",2)
+xlabel("Gait Cycle (%)")
+ylabel("Phase Variable")
+xline(gc(90+42),"r--","linewidth",2)
+grid on
+subplot(514)
+plot(gc,state,"linewidth",2)
+xlabel("Gait Cycle (%)")
+ylabel("State")
+xline(gc(90+42),"r--","linewidth",2)
+grid on
+subplot(515)
+plot(gc,ddt(knee_shift,fs)./ddt(thigh_shift,fs),"linewidth",2)
+ylabel("Knee_{vel}/Thigh_{vel}")
+xlabel("Gait Cycle (%)")
+xline(gc(90+42),"r--","linewidth",2)
 grid on
 
