@@ -7,11 +7,11 @@ function [currPV,currState,sm,qhm,mhf] = calculatePhaseVariable_Stair_FF(thigh, 
         
         timeForCalculatingPhaseDot = 0;
         pushoffPhaseDot = 0;
-        dt = .01;
+        dt = 1/150;
         s_po = 0;
     end
 
-    maxPhaseRateforFF = 10;
+    maxPhaseRateforFF = 2;
     if prevPV >= pv_swing_thresh && prevPV < 1 
         FC = 0;
     else
@@ -38,14 +38,14 @@ function [currPV,currState,sm,qhm,mhf] = calculatePhaseVariable_Stair_FF(thigh, 
             currState = 3;
             sm = descendingPV;
             qhm = thigh;
-            pdot = (prevPV-s_po)/timeForCalculatingPhaseDot
-            pushoffPhaseDot = clamp((prevPV-s_po)/timeForCalculatingPhaseDot,0,maxPhaseRateforFF);
+            pdot = (sm-s_po)/timeForCalculatingPhaseDot;
+            pushoffPhaseDot = clamp((sm-s_po)/timeForCalculatingPhaseDot,0,maxPhaseRateforFF);
         else
             timeForCalculatingPhaseDot = timeForCalculatingPhaseDot+dt;
         end
         
     elseif prevState == 3
-        currPV = min(prevPV+pushoffPhaseDot*dt,pv_swing_thresh);
+        currPV = min(prevPV+pushoffPhaseDot*dt,.7);
         if FC == 0
             currState = 4;
         end
@@ -70,7 +70,9 @@ function [currPV,currState,sm,qhm,mhf] = calculatePhaseVariable_Stair_FF(thigh, 
     if ~exist('currState','var')
         currState = prevState;
     end
-
-
+    
+%     if currState ~= 1
+        currPV = filterPhase(currPV,prevPV,.9);
+%     end
 
 end
