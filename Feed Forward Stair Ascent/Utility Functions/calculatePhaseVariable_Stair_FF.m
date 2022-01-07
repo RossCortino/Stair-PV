@@ -12,6 +12,7 @@ function [currPV,currState,sm,qhm,mhf] = calculatePhaseVariable_Stair_FF(thigh, 
     end
 
     maxPhaseRateforFF = 2;
+    minPhaseRateForFF = .4;
     if prevPV >= pv_swing_thresh && prevPV < 1 
         FC = 0;
     else
