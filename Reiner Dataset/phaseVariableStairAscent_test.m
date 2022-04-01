@@ -18,6 +18,8 @@ ankleTorqueAscent = riener.stairAscent.ankle.torque'*mass;
 
 vGRF = riener.stairAscent.GRF.vertical'*mass;
 
+
+
 thigh = hipAngleAscent;
 thighd = ddt(hipAngleAscent);
 qh_min = min(thigh);
@@ -26,8 +28,15 @@ qh_max = max(thigh);
 t = linspace(0,1,length(thigh));
 gc = t*100;
 
+shift = find(thigh == qh_max);
 
-c = t(find(thigh == qh_min));
+vg_shift = circshift(vGRF,-shift);
+
+gc(find(vg_shift < 10))
+
+
+
+c = .61;
 prevState = 1;
 prevPV = 0;
 sm = .63;
@@ -137,7 +146,8 @@ ylabel('Ground Reaction Force (N)')
 xlabel('Gait Cycle (%)')
 legend('Measured','FC Threshold')
 
-
+figure
+plot(gc, ankleAngleAscent)
 
 % figure
 % subplot(311)
