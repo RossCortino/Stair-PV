@@ -41,6 +41,7 @@ hold on
 plot(t, thigh_25)
 plot(t, thigh_30)
 plot(t, thigh_35)
+legend('20','25','30','35')
 
 L = length(thigh_20);
 
@@ -80,6 +81,8 @@ for ind = 1:4
             ankle_mean = ankle_20;
             current_incline = '-20^o';
     end
+    
+   
     
     %     knee_mean = knee_mean;
     %     thigh_mean = thigh_mean;

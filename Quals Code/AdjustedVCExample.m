@@ -131,7 +131,8 @@ set(gca,'FontSize',15)
 xlabel('Gait Cycle (%)')
 ylabel('Thigh Angle (^o)')
 grid on
-
+set(gca,'Fontsize',15)
+saveas(gcf,'thigh_AB','svg');
 figure
 
 plot(gc, pv,'linewidth',2)
@@ -147,6 +148,9 @@ set(gca,'FontSize',15)
 xlabel('Gait Cycle (%)')
 ylabel('Phase')
 grid on
+set(gca,'Fontsize',15)
+saveas(gcf,'pv_AB','svg');
+
 
 indigo = [0 119 187]/255;
 % blue = [0 119 187]/255;
